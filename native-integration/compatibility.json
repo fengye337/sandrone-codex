@@ -3,7 +3,7 @@
   "addonName": "Local.Sandrone.CodexNativeTheme",
   "addonPublisher": "CN=SandroneLocal, OID.2.25.311729368913984317654407730594956997722=1",
   "addonPublisherId": "vt89pjxv8jer8",
-  "addonVersion": "0.3.6.0",
+  "addonVersion": "0.4.1.0",
   "targets": [
     {
       "name": "OpenAI.Codex",

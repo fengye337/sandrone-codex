@@ -14,7 +14,7 @@
 在仓库根目录的终端中运行：
 
 ```sh
-zsh ./Build-Mac.command
+zsh ./Build-Mac-Static.command
 ```
 
 脚本在临时目录构建，并创建 `~/Applications/桑多涅 ChatGPT.app`。如果目标已存在，它会停止而不会覆盖；请自行移走旧版本再重建。构建时从用户本机已安装的官方应用读取图标，仓库不再分发该图标。生成的应用仅使用临时自签名，未经过 Apple 公证。
@@ -22,7 +22,7 @@ zsh ./Build-Mac.command
 先保存工作并完全退出 ChatGPT，再打开生成的启动器。可以把该启动器拖入 Dock；它是独立的启动程序，实际运行的 ChatGPT 可能在 Dock 显示另一个图标。首次启动失败时可从终端运行以下命令查看报错：
 
 ```sh
-node ./engine/macos-skin.mjs
+node ./macos/static/macos-skin.mjs
 ```
 
 如果应用已经在运行，加载器会拒绝启动第二个实例；请先手动退出，加载器不会强制关闭正在进行的工作。

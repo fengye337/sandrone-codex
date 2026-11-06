@@ -39,4 +39,4 @@ for(const name of ['SandroneCodex.exe','Setup.ps1','Remove-Shortcuts.ps1','Build
  hashes[name]=sha(await fs.readFile(path.join(root,name)));
 }
 await fs.writeFile(path.join(root,'integrity.json'),JSON.stringify(hashes,null,2)+'\n');
-console.log(JSON.stringify({pass:true,files:Object.keys(hashes).length,edition:edition.edition,version:'0.6.1'}));
+console.log(JSON.stringify({pass:true,files:Object.keys(hashes).length,edition:edition.edition,version:'0.7.0'}));

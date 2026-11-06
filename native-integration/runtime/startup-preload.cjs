@@ -76,15 +76,16 @@ function installStartupScreen(config, send) {
     shadow.innerHTML = `<style>
       :host{color:#eee9dc;font-family:"Segoe UI","Microsoft YaHei",sans-serif}
       *{box-sizing:border-box}.screen{position:absolute;inset:0;background:#0b111b;outline:0}
+      .stage{position:absolute;left:50%;top:50%;width:min(100vw,177.777778vh);height:min(100vh,56.25vw);transform:translate(-50%,-50%);container-type:inline-size}
       .art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
-      .bottom{position:absolute;left:5%;right:5%;bottom:6%;max-width:560px;padding:14px 18px;background:#0b111be8;border-left:2px solid #d3b77e}
+      .bottom{position:absolute;left:5%;bottom:6%;width:38%;max-width:560px;padding:clamp(6px,1cqw,14px) clamp(8px,1.2cqw,18px);background:#0b111be8;border-left:2px solid #d3b77e;max-height:88%;overflow:auto}
       .status{font-size:14px;letter-spacing:.08em}.hint{font-size:12px;margin-top:10px;color:#c4b89d}
       progress{display:block;width:100%;height:3px;margin-top:12px;appearance:none;border:0;background:#d3b77e22}
       progress::-webkit-progress-bar{background:#d3b77e22}progress::-webkit-progress-value{background:linear-gradient(90deg,#946641,#ecd399,#a8ddea)}
       .recovery{margin-top:10px}button{color:#eee9dc;background:#263343;border:1px solid #766246;padding:7px 12px;margin:4px;cursor:pointer}
       .screen.fading{opacity:0;transition:opacity .25s ease}.screen.fading *{pointer-events:none}
       [hidden]{display:none!important}
-    </style><div class="screen" role="dialog" aria-modal="true" aria-label="桑多涅启动画面" tabindex="0"><img class="art" alt="桑多涅"><div class="bottom"><div class="status" aria-live="polite"></div><progress max="5" value="1" aria-label="启动阶段"></progress><div class="hint"></div><div class="recovery" hidden><button data-action="login" hidden>继续登录</button><button data-action="retry" hidden>重试检查</button><button data-action="native" hidden>使用原生界面</button></div></div></div>`;
+    </style><div class="screen" role="dialog" aria-modal="true" aria-label="桑多涅启动画面" tabindex="0"><div class="stage"><img class="art" alt="桑多涅"><div class="bottom"><div class="status" aria-live="polite"></div><progress max="5" value="1" aria-label="启动阶段"></progress><div class="hint"></div><div class="recovery" hidden><button data-action="login" hidden>继续登录</button><button data-action="retry" hidden>重试检查</button><button data-action="native" hidden>使用原生界面</button></div></div></div></div>`;
     shadow.querySelector('img').src = introDone ? config.media.still || config.media.poster : config.media.poster;
     const screen = shadow.querySelector('.screen');
     screen.addEventListener('dblclick', event => {
@@ -114,7 +115,7 @@ function installStartupScreen(config, send) {
       video = document.createElement('video'); video.className = 'art';
       video.muted = true; video.playsInline = true; video.preload = 'auto';
       video.setAttribute('aria-hidden', 'true'); video.poster = config.media.poster;
-      screen.insertBefore(video, shadow.querySelector('.bottom'));
+      shadow.querySelector('.stage').insertBefore(video, shadow.querySelector('.bottom'));
       const owner = video;
       video.addEventListener('error', () => { if (video === owner) fallback(); });
       video.addEventListener('ended', () => {

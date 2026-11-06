@@ -6,13 +6,14 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // Produce argv, never a shell command. No process is launched by this module.
 export function launchPlan(app, projectRoot=root) {
+  const paths=path.posix;
   if (!app || app.error || !app.electron || !/codex/i.test(app.id??'')) throw new Error('A verified Codex Electron bundle is required');
-  if (!path.isAbsolute(app.path) || !app.executable || path.basename(app.executable)!==app.executable) throw new Error('Invalid app executable');
-  if (!path.isAbsolute(projectRoot)) throw new Error('Absolute project directory required');
+  if (!paths.isAbsolute(app.path) || !app.executable || paths.basename(app.executable)!==app.executable) throw new Error('Invalid app executable');
+  if (!paths.isAbsolute(projectRoot)) throw new Error('Absolute project directory required');
   return {
-    executable:path.join(app.path,'Contents/MacOS',app.executable),
-    args:['--remote-debugging-address=127.0.0.1','--remote-debugging-port=19337',`--user-data-dir=${path.join(projectRoot,'profile/macos')}`],
-    profile:path.join(projectRoot,'profile/macos'),
+    executable:paths.join(app.path,'Contents/MacOS',app.executable),
+    args:['--remote-debugging-address=127.0.0.1','--remote-debugging-port=19337',`--user-data-dir=${paths.join(projectRoot,'profile/macos')}`],
+    profile:paths.join(projectRoot,'profile/macos'),
     status:'PLAN_ONLY',
     prerequisites:['Save work and manually quit existing Codex sessions.',
       'Verify that port 19337 is free before launch.',

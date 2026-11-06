@@ -13,3 +13,5 @@ https://github.com/fengye337/sandrone-codex/pull/6
 本地調整：辨識 ChatGPT.app 與 Codex Framework.framework、增加僅檢查模式、獨立 renderer 檔案、視窗 resize 更新與移除函式、WebSocket 錯誤清理、Cocoa 原生啟動器、建置到專案 dist/，不寫入 ~/Applications。
 
 啟動器使用既有應用程式設定與登入狀態，與早期 launch-plan 的獨立 profile 規劃不同。這是靜態背景實驗，尚未包含 Windows 開屏。程式會啟用本機除錯介面，本機其他程序可能存取應用內容；完全退出 ChatGPT 才會關閉介面。
+
+维护侧于 2026-11-06 整合两个 PR，已保留 #6 的原始 Git 提交历史；静态基线独立保存于 macos/static/，使用 Build-Mac-Static.command。上文为贡献时的来源记录。

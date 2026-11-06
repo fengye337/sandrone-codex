@@ -8,9 +8,17 @@
 
 ![桑多涅同窗开屏](docs/images/opening.png)
 
+## 最新版 0.7.0
+
+- **[Windows 自动适配主题包](https://github.com/fengye337/sandrone-codex/releases/download/v0.7.0/SandroneCodex-0.7.0-Windows-AutoTheme-x64.zip)**：沿用官方 profile，1080p60 预渲染开屏、真实加载阶段、重播与恢复；普通更新由启动器自动生成精确适配包。需一次性安装微软 Windows SDK 签名工具，详见 [自动适配版说明](windows/auto/README.md)。首次和更新安装均需正常退出客户端，并亲自确认 Windows 权限提示。
+- Windows 便携版：带运行时，适合不安装 SDK 的用户；保留独立 profile 和原开屏引擎。
+- **[macOS 源码与完整素材](https://github.com/fengye337/sandrone-codex/releases/download/v0.7.0/SandroneCodex-0.7.0-Source.zip)**：完整主题/Dock 启动器用 `Build-Mac.command`；静态背景入口用 `Build-Mac-Static.command`。分别保留 #7 与 #6 的实现和署名，见 [Mac 完整版](macos/README.md) 与 [静态版](docs/MACOS.zh-CN.md)。Mac 为实验性社区支持，维护方没有 Mac，未实机验证或提供已公证的 Mac 二进制；请 Mac 使用者自行构建和反馈适配结果。
+
+0.7.0 修复窗口模式下开屏状态栏与视频采用不同坐标系导致的错位，已覆盖六种窗口比例。普通版本更新可以自动准备适配包；官方真正修改加载接口时仍可能需要修复。默认不安装后台任务。历史原生版本说明见下文；以本节和对应发布说明为当前使用入口。
+
 ## 下载并直接使用
 
-**[下载完整启动器 v0.6.1](https://github.com/fengye337/sandrone-codex/releases/download/v0.6.1/SandroneCodex-0.6.1-Windows-x64.zip)** · [全部发布文件](https://github.com/fengye337/sandrone-codex/releases)
+**[下载便携启动器 v0.7.0](https://github.com/fengye337/sandrone-codex/releases/download/v0.7.0/SandroneCodex-0.7.0-Windows-x64.zip)** · [全部发布文件](https://github.com/fengye337/sandrone-codex/releases)
 
 完整版带桑多涅立绘、视频、轮廓、签名和 Node 运行时，普通使用者不需要 Git、Python、npm 或自行编译。
 
@@ -75,7 +83,7 @@
 
 ## 兼容与安全边界
 
-- 本机验证：Windows 11 x64、官方 Codex 26.1016.8622.0；发行版 0.6.1，主题扩展 0.5.3。
+- 本机验证：Windows 11 x64、官方 Codex 26.1016.8622.0；历史便携实机记录为 0.6.1；当前发行版 0.7.0。
 - 依赖官方 UI 结构；其他版本、首次冷启动、真实聊天/模型/MCP/审批仍需使用者验证。
 - 官方与主题入口需要手动退出切换，不保证同时运行。
 - 固定调试端口 19337 只允许回环，并核验进程与 browser ID；本机其他进程仍可能访问它。

@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)][string]$OfficialMsix,
+    [string]$OfficialMsix,
+    [switch]$UseInstalledStorePackage,
     [string]$OutputDirectory,
     [string]$GccPath,
     [string]$MakeAppxPath,
@@ -11,9 +12,11 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'package-common.ps1')
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $compatibility = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'compatibility.json') -Raw | ConvertFrom-Json
+if (!$UseInstalledStorePackage) {
 $source = (Get-Item -LiteralPath $OfficialMsix).FullName
 $signature = Get-AuthenticodeSignature -LiteralPath $source
 if ($signature.Status.ToString() -ne 'Valid') { throw 'The source MSIX must have a valid official signature.' }
+}
 $gcc = Resolve-SandroneCompiler $GccPath
 $makeappx = Resolve-SandroneMakeAppx $MakeAppxPath
 if (!$OutputDirectory) { $OutputDirectory = Join-Path $repoRoot ('dist\native-addon\' + [Guid]::NewGuid().ToString('N')) }
@@ -30,6 +33,33 @@ else {
 }
 $nodeVersion = & $node -p 'process.versions.node'
 if ($LASTEXITCODE -ne 0 -or [version]$nodeVersion -lt [version]'24.0.0') { throw 'Startup media build checks require Node.js 24 or later.' }
+if ($UseInstalledStorePackage) {
+
+    $officialPackages = @(Get-AppxPackage -Name OpenAI.Codex)
+    if ($officialPackages.Count -ne 1) { throw 'Exactly one official Store package must be registered.' }
+    $official = $officialPackages[0]
+    if ($official.SignatureKind.ToString() -ne 'Store' -or $official.Status.ToString() -ne 'Ok' -or $official.IsDevelopmentMode) {
+        throw 'The installed source must be an intact official Store package.'
+    }
+    $identity = [pscustomobject]@{ Name = $official.Name; Version = $official.Version.ToString(); Publisher = $official.Publisher; ProcessorArchitecture = $official.Architecture.ToString().ToLowerInvariant() }
+    $target = Get-SandroneTarget $compatibility $identity
+    if ($official.PackageFullName -cne $target.packageFullName) { throw 'Installed source identity does not match the compatibility matrix.' }
+    $hashes = [ordered]@{}
+    foreach ($property in $target.files.PSObject.Properties) {
+        Assert-SandroneRelativePath $property.Name
+        $hash = Get-SandroneHash (Join-Path $official.InstallLocation $property.Name)
+        if ($hash -cne $property.Value) { throw ('Unsupported installed official file: ' + $property.Name) }
+        $hashes[$property.Name] = $hash
+    }
+    $package = Join-Path $output 'package'
+    $native = Join-Path $package ('VFS\ProgramFilesX64\WindowsApps\' + $target.packageFullName + '\app\resources\native')
+    $addon = Join-Path $native 'sandrone'
+    $null = New-Item -ItemType Directory -Path (Join-Path $addon 'management') -Force
+    $original = Join-Path $native 'windows-updater.original.node'
+    Copy-Item -LiteralPath (Join-Path $official.InstallLocation 'app\resources\native\windows-updater.node') -Destination $original
+    if ((Get-SandroneHash $original) -cne $target.files.'app/resources/native/windows-updater.node') { throw 'Copied official updater digest changed.' }
+
+} else {
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [IO.Compression.ZipFile]::OpenRead($source)
 try {
@@ -56,6 +86,8 @@ try {
     $original = Join-Path $native 'windows-updater.original.node'
     [IO.Compression.ZipFileExtensions]::ExtractToFile($archive.GetEntry('app/resources/native/windows-updater.node'), $original)
 } finally { $archive.Dispose() }
+
+}
 
 $renderMode = '--ensure'; if ($RebuildStartupMedia) { $renderMode = '--force' }
 & $node (Join-Path $repoRoot 'tools\render-startup.mjs') $renderMode --root $repoRoot
@@ -114,7 +146,9 @@ $bundle = [ordered]@{
     targetPackage = $target.packageFullName; targetPublisher = $target.publisher
     officialHashes = $hashes; proxySha256 = Get-SandroneHash $proxy
     packageFile = [IO.Path]::GetFileName($msix); packageSha256 = Get-SandroneHash $msix
-    sourceMsixSha256 = Get-SandroneHash $source
+    sourceMsixSha256 = if ($UseInstalledStorePackage) { $null } else { Get-SandroneHash $source }
+    sourceKind = if ($UseInstalledStorePackage) { 'verified-installed-store-package' } else { 'signed-official-msix' }
+    sourceStorePackage = $target.packageFullName
     startupSourceFingerprint = $startup.source.fingerprint
 }
 Write-SandroneJson (Join-Path $output 'bundle.json') $bundle
