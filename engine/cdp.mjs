@@ -1,9 +1,9 @@
 export const PORT=19337;
 const failure=(message,code)=>Object.assign(new Error(message),{code});
 export const protocolFailure=error=>Object.assign(failure(error.message,/context|target|session|frame|navigat/i.test(error.message)?'CDP_CONTEXT':'CDP_COMMAND'),{cdpCode:error.code});
-export function debuggerUrl(value,browserId=null){
+export function debuggerUrl(value,browserId=null,port=PORT){
  const u=new URL(value);
- if(u.protocol!=='ws:'||u.hostname!=='127.0.0.1'||u.port!==String(PORT)||u.username||u.password||u.search||u.hash||!/^\/devtools\/(page|browser)\/[A-Za-z0-9._-]{1,200}$/.test(u.pathname))throw new Error('Rejected non-loopback debugger identity');
+ if(!Number.isInteger(port)||port<1||port>65535||u.protocol!=='ws:'||u.hostname!=='127.0.0.1'||u.port!==String(port)||u.username||u.password||u.search||u.hash||!/^\/devtools\/(page|browser)\/[A-Za-z0-9._-]{1,200}$/.test(u.pathname))throw new Error('Rejected non-loopback debugger identity');
  if(browserId&&u.pathname!==`/devtools/browser/${browserId}`)throw failure('Browser identity changed','IDENTITY_MISMATCH');
  return u.href;
 }
@@ -24,17 +24,18 @@ export async function appPages(browserId){
  });
 }
 export class Session{
- constructor(url){this.url=debuggerUrl(url);this.seq=0;this.waiting=new Map();this.events=new Set();this.closed=false;}
+ constructor(url,{port=PORT}={}){this.url=debuggerUrl(url,null,port);this.seq=0;this.waiting=new Map();this.events=new Set();this.closed=false;}
  async open(){
   this.socket=new WebSocket(this.url);
   await new Promise((resolve,reject)=>{const t=setTimeout(()=>{this.socket.close();reject(failure('Debugger connection timed out','CDP_TIMEOUT'));},2000);this.socket.onopen=()=>{clearTimeout(t);resolve();};this.socket.onerror=()=>{clearTimeout(t);reject(failure('Debugger connection failed','CDP_CLOSED'));};this.socket.onclose=()=>{clearTimeout(t);this.closed=true;reject(failure('Debugger closed before connection','CDP_CLOSED'));};});
-  this.socket.onmessage=e=>{try{const v=JSON.parse(e.data);if(v.method){for(const listener of this.events)listener(v.method,v.params);return;}const job=this.waiting.get(v.id);if(!job)return;this.waiting.delete(v.id);clearTimeout(job.timer);v.error?job.reject(protocolFailure(v.error)):job.resolve(v.result);}catch{}};
+  this.socket.onmessage=e=>{try{const v=JSON.parse(e.data);if(v.method){for(const listener of this.events)listener(v.method,v.params,v.sessionId);return;}const job=this.waiting.get(v.id);if(!job)return;this.waiting.delete(v.id);clearTimeout(job.timer);v.error?job.reject(protocolFailure(v.error)):job.resolve(v.result);}catch{}};
   this.socket.onclose=()=>{this.closed=true;for(const job of this.waiting.values()){clearTimeout(job.timer);job.reject(failure('Debugger session closed','CDP_CLOSED'));}this.waiting.clear();};return this;
  }
- async send(method,params={},timeoutMs=3000){
+ async send(method,params={},timeoutMs=3000,sessionId){
   if(this.closed)throw failure('Debugger session is closed','CDP_CLOSED');const id=++this.seq;
-  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{this.waiting.delete(id);reject(failure('Debugger command timed out','CDP_TIMEOUT'));},timeoutMs);this.waiting.set(id,{resolve,reject,timer});try{this.socket.send(JSON.stringify({id,method,params}));}catch{clearTimeout(timer);this.waiting.delete(id);reject(failure('Debugger session is closed','CDP_CLOSED'));}});
+  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{this.waiting.delete(id);reject(failure('Debugger command timed out','CDP_TIMEOUT'));},timeoutMs);this.waiting.set(id,{resolve,reject,timer});try{this.socket.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));}catch{clearTimeout(timer);this.waiting.delete(id);reject(failure('Debugger session is closed','CDP_CLOSED'));}});
  }
+ sendTo(sessionId,method,params={},timeoutMs=3000){return this.send(method,params,timeoutMs,sessionId);}
  async evaluate(expression,{timeoutMs=3000}={}){const r=await this.send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true},timeoutMs);if(r.exceptionDetails)throw new Error('Fixed renderer component failed: '+(r.exceptionDetails.exception?.description?.split('\n')[0]||r.exceptionDetails.text));return r.result?.value;}
  onEvent(listener){this.events.add(listener);return ()=>this.events.delete(listener);}
  close(){

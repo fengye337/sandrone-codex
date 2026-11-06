@@ -1,3 +1,5 @@
+> **实验性 macOS 支持**：提供基于原版引擎的 Mac 启动器，使用方法、Dock 控制、依赖及验证范围见 [macOS 说明](macos/README.md)。需从专用入口启动，主题仍可能晚于官方窗口显示。
+
 # Sandrone Codex · 桑多涅人偶工坊
 
 为 **Windows 11 x64 上的官方 Codex 桌面客户端**制作的非官方桑多涅主题与启动器。

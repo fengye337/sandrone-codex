@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/fengye337/sandrone-codex",
+  "fork": "https://github.com/teddy7286317/sandrone-codex-Mac-Dev",
+  "branch": "main",
+  "commit": "dfea82e39d9d4a42524dc9eed3d61204254d0d3a",
+  "checkedDate": "2026-11-05",
+  "forkAndUpstreamMatched": true,
+  "player": "engine/opening-client.mjs + engine/renderer.mjs (unmodified upstream)"
+}

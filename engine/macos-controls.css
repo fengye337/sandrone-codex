@@ -1,0 +1,38 @@
+/* Home composer Chat/Work only. The track utility + pressed-button structure
+   identifies the dedicated component without localized labels or module hashes.
+   Use the original accessibility layer so scoped important states outrank its
+   general button rules. Do not change native selection, animation or geometry. */
+@layer dreamskin-accessibility {
+ html[data-dream-skin="active"] :is(main.main-surface, main[data-app-shell-main-surface], main[class*="_MainContentSurface_"]) [role="group"]:has(> .bg-background-mode-toggle-track):has(> button[aria-pressed][class*="text-mode-toggle-"]) {
+  --color-background-mode-toggle-track:#151e2a !important;
+  --color-background-mode-toggle-selected:#3b3021 !important;
+  --color-border-mode-toggle-selected:#c7a86e !important;
+  --color-text-mode-toggle-primary:#f4eddd !important;
+  --color-text-mode-toggle-inactive:#c2c8cf !important;
+  --color-text-mode-toggle-accent:#e3c477 !important;
+ }
+ html[data-dream-skin="active"] :is(main.main-surface, main[data-app-shell-main-surface], main[class*="_MainContentSurface_"]) [role="group"]:has(> .bg-background-mode-toggle-track):has(> button[aria-pressed][class*="text-mode-toggle-"]) > button[aria-pressed]:not(:disabled):not([aria-disabled="true"]) {
+  background-color:transparent !important;
+  color:var(--color-text-mode-toggle-inactive) !important;
+ }
+ html[data-dream-skin="active"] :is(main.main-surface, main[data-app-shell-main-surface], main[class*="_MainContentSurface_"]) [role="group"]:has(> .bg-background-mode-toggle-track):has(> button[aria-pressed][class*="text-mode-toggle-"]) > button[aria-pressed="true"]:not(:disabled):not([aria-disabled="true"]) {
+  color:var(--color-text-mode-toggle-primary) !important;
+ }
+ html[data-dream-skin="active"] :is(main.main-surface, main[data-app-shell-main-surface], main[class*="_MainContentSurface_"]) [role="group"]:has(> .bg-background-mode-toggle-track):has(> button[aria-pressed][class*="text-mode-toggle-"]) > button[aria-pressed="false"]:not(:disabled):not([aria-disabled="true"]):hover {
+  background-color:#273443 !important;
+  color:var(--color-text-mode-toggle-primary) !important;
+ }
+ html[data-dream-skin="active"] :is(main.main-surface, main[data-app-shell-main-surface], main[class*="_MainContentSurface_"]) [role="group"]:has(> .bg-background-mode-toggle-track):has(> button[aria-pressed][class*="text-mode-toggle-"]):has(> button[aria-pressed="true"]:not(:disabled):not([aria-disabled="true"]):hover) > [class*="_indicator_"] {
+  background-color:#4a3d29 !important;
+ }
+ html[data-dream-skin="active"] :is(main.main-surface, main[data-app-shell-main-surface], main[class*="_MainContentSurface_"]) [role="group"]:has(> .bg-background-mode-toggle-track):has(> button[aria-pressed][class*="text-mode-toggle-"]) > button[aria-pressed]:not(:disabled):not([aria-disabled="true"]):focus-visible {
+  color:var(--color-text-mode-toggle-primary) !important;
+  outline:2px solid #e3c477 !important;
+  outline-offset:3px !important;
+ }
+ /* Native CSS redirects the selected button's focus outline to the moving
+    indicator. Keep one consistent keyboard ring on the actual focused button. */
+ html[data-dream-skin="active"] :is(main.main-surface, main[data-app-shell-main-surface], main[class*="_MainContentSurface_"]) [role="group"]:has(> .bg-background-mode-toggle-track):has(> button[aria-pressed][class*="text-mode-toggle-"]):has(> button[aria-pressed]:focus-visible) > [class*="_indicator_"] {
+  outline:none !important;
+ }
+}
